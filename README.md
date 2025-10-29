@@ -8,11 +8,9 @@ A polished Terminal User Interface (TUI) chat application that mirrors the OpenA
 - **Real-time Streaming**: Live character-by-character typing animation as responses arrive
 - **OpenAI-Compatible Backend**: Works with any OpenAI-compatible API endpoint
 - **File Context Attachment**: Use `#` to attach local files as context for your queries
-- **Multiline Input**: Shift+Enter for new lines, Enter to send messages
 - **Token Awareness**: Automatic message splitting when approaching token limits
-- **Graceful Error Handling**: Clear error messages for debugging
 - **Chat History Management**: Save, clear, and manage conversations
-- **Command System**: Special commands for power users
+- **Command System**: Commands with /
 
 ## System Requirements
 
@@ -24,12 +22,12 @@ A polished Terminal User Interface (TUI) chat application that mirrors the OpenA
 
 1. **Clone/Open the project**:
    ```bash
-   cd chat_tui
+   cd tui_cli
    ```
 
 2. **Create virtual environment** (recommended):
    ```bash
-   python3 -m venv venv
+   python3 -m venv .venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
 
@@ -91,11 +89,9 @@ Enter to send
 ### File Context Attachment
 
 1. Type `#` to open the modal file picker
-2. Click on files to select/deselect them (checkbox toggles)
-3. Use mouse or keyboard navigation (arrow keys)
-4. Press **Space** to toggle selection for focused file
-5. Click **"Add Selected"** or press **Enter** to attach files
-6. Use **Escape** or **"Cancel"** to close without attaching
+2. Use keyboard navigation (arrow keys)
+3. Press **Enter** to attach files
+4. Use **Escape** or **"Cancel"** to close without attaching
 
 Selected files are loaded into memory and their contents included as context in your next message.
 
@@ -113,7 +109,7 @@ Selected files are loaded into memory and their contents included as context in 
 - **Enter** - Send message
 - **Shift+Enter** - New line in input
 - **Ctrl+C** - Quit gracefully
-- **Arrow Keys** - Navigate (in file selector)
+- **Arrow Keys** - Navigate (in file selector and chat bar)
 - **Space** - Toggle file selection
 
 ## File Structure
@@ -162,7 +158,7 @@ POST /v1/chat/completions
     "model": "gpt-4o-mini",
     "messages": [...],
     "stream": true,
-    "temperature": 0.7,
+    "temperature": 0.1,
     "max_tokens": 4096
 }
 ```

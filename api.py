@@ -42,7 +42,7 @@ class APIClient:
         self,
         messages: List[Dict[str, str]],
         max_tokens: Optional[int] = None,
-        temperature: float = 0.7,
+        temperature: float = 0.1,
     ) -> AsyncGenerator[str, None]:
         """
         Stream chat completion tokens.
