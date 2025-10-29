@@ -706,12 +706,14 @@ class CodexCLI:
             async def open_file_selector(self) -> None:
                 """Open file selector dialog."""
                 try:
+                    # Clear files before opening picker
+                    app_state.clear_selected_files()
+                    
                     # Push the file picker screen as a modal
                     file_picker = FilePickerScreen()
-                    result = await self.push_screen(file_picker)
                     
-                    if result:
-                        # Files were selected
+                    # Use a callback to handle result when screen closes
+                    def handle_file_picker_result(result):
                         count = len(app_state.selected_files)
                         if count > 0:
                             file_names = [f.name for f in app_state.selected_files]
@@ -719,12 +721,14 @@ class CodexCLI:
                                 f"Attached {count} file(s): {', '.join(file_names)}"
                             )
                         else:
-                            app_state.add_system_message("No files selected")
-                    else:
-                        # User cancelled
-                        app_state.add_system_message("File selection cancelled")
+                            if result is False:
+                                app_state.add_system_message("File selection cancelled")
+                            else:
+                                app_state.add_system_message("No files selected")
+                        
+                        self.refresh_chat_display()
                     
-                    self.refresh_chat_display()
+                    self.push_screen(file_picker, handle_file_picker_result)
                     
                 except Exception as e:
                     app_state.add_error_message(f"File picker error: {str(e)}")
