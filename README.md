@@ -1,4 +1,4 @@
-# Codex CLI TUI Chat Application
+# TUI CLI Chat Application
 
 A polished Terminal User Interface (TUI) chat application that mirrors the OpenAI Codex CLI demo. Built with Python, featuring real-time streaming responses, file context attachment, and an intuitive interface.
 
@@ -246,4 +246,4 @@ For issues or questions:
 
 ---
 
-**Enjoy chatting with Codex CLI!** 🚀
+**Enjoy chatting with TUI CLI!** 🚀

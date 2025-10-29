@@ -1,9 +1,9 @@
 #!/bin/bash
-# setup.sh - Codex CLI v1.0 setup helper
+# setup.sh - TUI CLI v1.0 setup helper
 
 set -e
 
-echo "🚀 Codex CLI v1.0 - Setup Helper"
+echo "🚀 TUI CLI v1.0 - Setup Helper"
 echo "=================================="
 echo ""
 

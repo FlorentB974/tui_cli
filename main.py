@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Main entry point for Codex CLI TUI chat application."""
+"""Main entry point for CLI TUI chat application."""
 import asyncio
 import sys
 from pathlib import Path

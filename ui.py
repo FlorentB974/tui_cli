@@ -83,7 +83,7 @@ class ChatContent(Static):
         # If there is no history, show the welcome message
         if not app_state.chat_history:
             welcome = (
-                "Welcome to Codex CLI v1.0\n\n"
+                "Welcome to TUI CLI v1.0\n\n"
                 "Type your message and press Enter to chat.\n"
                 "Press Ctrl+C to stop streaming or quit.\n"
                 "Type /help for commands."
@@ -542,13 +542,17 @@ class TUI:
             """Textual Chat Application."""
             
             CSS = """
+            $accent: #00aa00;
+            
             Screen {
                 layout: vertical;
             }
             
             #banner {
-                height: 3;
+                height: 4;
                 dock: top;
+                border: solid $accent;
+                content-align: center middle;
             }
             
             #chat-display {
@@ -580,6 +584,7 @@ class TUI:
             #message-input {
                 dock: bottom;
                 height: 3;
+                border: solid $accent;
             }
             
             #commands {
@@ -595,18 +600,15 @@ class TUI:
                 yield ChatDisplay(id="chat-display")
                 yield Static(self.get_input_instruction(), id="input-info")
                 yield MessageInput(
-                    placeholder="Type # to attach files or /help for commands...",
+                    placeholder="Type # to attach files (auto-opens picker) or /help for commands...",
                     id="message-input"
                 )
                 yield StreamingIndicator(id="streaming-indicator")
                 # yield Static(self.get_commands_help(), id="commands")
             
             def get_banner(self) -> str:
-                """Get ASCII banner."""
-                return """[bold cyan]╔═════════════════════════════════════════╗
-║       CODEX CLI v1.0                    ║
-║  OpenAI-Compatible TUI Chat Application ║
-╚═════════════════════════════════════════╝[/bold cyan]"""
+                """Get simple banner text with CSS border."""
+                return "[bold green]TUI CLI v1.0 - OpenAI-Compatible Chat Application[/bold green]"
             
             def get_input_instruction(self) -> str:
                 """Get input instructions."""
@@ -630,6 +632,12 @@ class TUI:
                 # Focus on input
                 input_widget = self.query_one("#message-input", MessageInput)
                 input_widget.focus()
+            
+            def on_resize(self, event) -> None:
+                """Handle terminal resize."""
+                # Refresh the banner when terminal is resized
+                banner = self.query_one("#banner", Static)
+                banner.update(self.get_banner())
             
             def on_key(self, event) -> None:
                 """Handle global key events."""
@@ -664,17 +672,18 @@ class TUI:
                     app_state.add_error_message(f"Input error: {str(e)}")
                     self.refresh_chat_display()
             
+            def on_input_changed(self, event: Input.Changed) -> None:
+                """Handle input changes to auto-open file picker on '#'."""
+                if event.value == "#":
+                    # Clear the input and open file picker automatically
+                    event.control.value = ""
+                    self.run_worker(self._worker_file_selector())
+            
             def _handle_input_sync(self, user_input: str) -> None:
                 """Handle input that can be processed synchronously."""
                 user_input = user_input.strip()
                 
                 if not user_input:
-                    return
-                
-                # Handle file attachment - # opens file picker
-                if user_input == "#":
-                    # Use run_worker to run async file selector
-                    self.run_worker(self._worker_file_selector())
                     return
                 
                 # Handle commands
@@ -700,7 +709,7 @@ class TUI:
                         "  /files      - Show attached files\n"
                         "  /clearfiles - Clear attached files\n"
                         "  /exit       - Quit application\n\n"
-                        "File attachment (type just '#' and press Enter):\n"
+                        "File attachment (type '#' to auto-open file picker):\n"
                         "  ↑↓          - Navigate files/folders\n"
                         "  Enter       - Add file or open folder\n"
                         "  Escape      - Cancel file picker\n\n"
