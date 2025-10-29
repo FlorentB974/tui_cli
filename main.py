@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from config import config
-from ui import CodexCLI
+from ui import TUI
 
 
 async def main():
@@ -22,7 +22,7 @@ async def main():
         sys.exit(1)
     
     # Run the CLI
-    cli = CodexCLI()
+    cli = TUI()
     await cli.run()
 
 

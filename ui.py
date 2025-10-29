@@ -1,6 +1,7 @@
 """Textual UI for the chat application."""
 import asyncio
 from pathlib import Path
+from typing import List
 
 from textual.app import ComposeResult
 from textual.widgets import Static, Input, Button, Label
@@ -482,7 +483,51 @@ class StreamingIndicator(Static):
         self.refresh()
 
 
-class CodexCLI:
+class MessageInput(Input):
+    """Custom input widget with message history navigation."""
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.history_index = -1  # -1 means current input, 0+ means history
+        self.current_input = ""   # Store the current input when navigating history
+    
+    def get_user_messages(self) -> List[str]:
+        """Get list of user messages from history."""
+        return [msg.content for msg in app_state.chat_history if msg.role == "user"]
+    
+    def on_key(self, event) -> None:
+        """Handle key events for history navigation."""
+        if event.key == "up":
+            # Navigate to previous message
+            user_messages = self.get_user_messages()
+            if user_messages:
+                if self.history_index == -1:
+                    # First time navigating, save current input
+                    self.current_input = self.value
+                self.history_index = min(self.history_index + 1, len(user_messages) - 1)
+                if self.history_index < len(user_messages):
+                    self.value = user_messages[-(self.history_index + 1)]  # Most recent first
+                event.prevent_default()
+        elif event.key == "down":
+            # Navigate to next message or back to current input
+            user_messages = self.get_user_messages()
+            if self.history_index > 0:
+                self.history_index -= 1
+                self.value = user_messages[-(self.history_index + 1)]
+            elif self.history_index == 0:
+                # Back to current input
+                self.history_index = -1
+                self.value = self.current_input
+            event.prevent_default()
+        else:
+            # Any other key resets history navigation
+            if self.history_index != -1:
+                self.history_index = -1
+                self.current_input = ""
+            # Let the input handle other keys normally (no prevent_default)
+
+
+class TUI:
     """Main TUI application using Textual."""
     
     def __init__(self):
@@ -549,7 +594,7 @@ class CodexCLI:
                 yield Static(self.get_banner(), id="banner")
                 yield ChatDisplay(id="chat-display")
                 yield Static(self.get_input_instruction(), id="input-info")
-                yield Input(
+                yield MessageInput(
                     placeholder="Type # to attach files or /help for commands...",
                     id="message-input"
                 )
@@ -583,7 +628,7 @@ class CodexCLI:
                 self.refresh_chat_display()
                 
                 # Focus on input
-                input_widget = self.query_one("#message-input", Input)
+                input_widget = self.query_one("#message-input", MessageInput)
                 input_widget.focus()
             
             def on_key(self, event) -> None:
@@ -815,7 +860,7 @@ class CodexCLI:
                     indicator.update_indicator()
                     
                     # Update input visibility based on streaming state
-                    input_widget = self.query_one("#message-input", Input)
+                    input_widget = self.query_one("#message-input", MessageInput)
                     input_widget.display = not app_state.is_streaming()
                     
                 except Exception:
@@ -836,7 +881,7 @@ class CodexCLI:
                         indicator.update_indicator()
                         
                         # Update input visibility based on streaming state
-                        input_widget = self.query_one("#message-input", Input)
+                        input_widget = self.query_one("#message-input", MessageInput)
                         input_widget.display = not app_state.is_streaming()
                         
                     except Exception:
